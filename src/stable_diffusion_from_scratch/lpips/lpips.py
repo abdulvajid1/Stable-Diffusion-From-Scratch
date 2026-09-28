@@ -21,7 +21,7 @@ class LPIPS(nn.Module):
             torch.tensor([0.229, 0.224, 0.225])
         ]
              
-        if image_range is "zero_to_one":
+        if image_range == "zero_to_one":
             self.register_buffer('mean', vgg_imagenet_scale_constants[0])
             self.register_buffer('std', vgg_imagenet_scale_constants[1])
         else:
@@ -51,7 +51,7 @@ class LPIPS(nn.Module):
                                       out_channels=1, 
                                       kernel_size=1, 
                                       stride=1)]
-            self.section_proj_layers[f'section_proj_{i}_layer'] = proj_layers # pyright: ignore[reportArgumentType]
+            self.section_proj_layers[f'section_proj_{i}_layer'] = nn.Sequential(*proj_layers) # pyright: ignore[reportArgumentType]
         
         self.pool_layer = nn.AdaptiveAvgPool2d(output_size=(1, 1))
     
@@ -126,14 +126,7 @@ class LpipsDiffToLogits(nn.Module):
         ratio2 = diff2 / (diff1 + eps)
         x_cat = torch.concat([diff1, diff2, diff, ratio1, ratio2], dim=1)
         return self.model(x_cat)
-        
-        
-        
-        
-        
-        
-        
-
+           
 
 
 if __name__ == "__main__":
