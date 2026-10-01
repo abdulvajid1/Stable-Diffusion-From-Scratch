@@ -9,8 +9,8 @@ from torch.utils.data import DataLoader
 from accelerate import Accelerator
 from tqdm import tqdm
 from diffusers.optimization import get_scheduler
-from .modules.lpips import LPIPS
 
-from .modules import VEA
-
+from .modules import VAE, LDMConfig, PatchGANDiscriminator, init_weights
+from .modules import LPIPS
+from dataset import get_dataset
 

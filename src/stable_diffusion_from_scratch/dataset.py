@@ -163,6 +163,65 @@ def ConceptualCaptionsCollateFunction(model_name="openai/clip-vit-large-patch14"
     return _collate_fn
 
 
+def get_dataset(dataset,
+                path_to_data, 
+                num_channels=3, 
+                img_size=256, 
+                random_resize=True, 
+                interpolation="bilinear",
+                random_flip_p=0.5,
+                train=True,
+                return_caption=True, 
+                return_classes=True,
+                text_encoder_model="openai/clip-vit-large-patch14",
+                pre_encoded_text=True):
+    
+    img_transform = image_transforms(num_channels=num_channels,
+                                     img_size=img_size, 
+                                     random_resize=random_resize, 
+                                     interpolation=interpolation, 
+                                     random_flip_p=random_flip_p, 
+                                     train=train)
+
+    if dataset == "celebahq":
+
+        if return_caption:
+            raise Exception("CelebAHQ Has No Captions!")
+        if return_classes:
+            raise Exception("celeba Has no Classes!")
+        
+        trainset = GenericImageDataset(path_to_data=path_to_data, 
+                                       transform=img_transform,
+                                       nested=False, 
+                                       return_classes=False)
+        
+        collate_fn = None
+        
+    elif dataset == "imagenet": 
+        if return_caption:
+            raise Exception("Imagenet Has No Captions!")
+
+
+        trainset = GenericImageDataset(path_to_data=path_to_data, 
+                                       transform=img_transform, 
+                                       nested=True,
+                                       return_classes=return_classes)   
+        
+        collate_fn = None
+        
+    elif dataset == "conceptual_captions":
+
+        trainset = conceptual_captions(path_to_data, 
+                                       img_transform)
+        
+        collate_fn = ConceptualCaptionsCollateFunction(model_name=text_encoder_model, 
+                                                       pre_encoded_text=pre_encoded_text)
+    else:
+        raise ValueError(f"{dataset} is not Supported")
+
+    return trainset, collate_fn
+
+
 if __name__ == "__main__":
 
     path_to_celebhq = "/mnt/datadrive/data/CelebAMask-HQ/CelebA-HQ-img/"
